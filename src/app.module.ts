@@ -1,9 +1,17 @@
 import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { TodoModule } from './todo/todo.module';
 
 @Module({
-  imports: [],
+  imports: [
+    TodoModule,
+    MongooseModule.forRoot(
+      'mongodb+srv://jngal:xWaKUOPWpVhL1qpy@cluster0.zc98lli.mongodb.net/nestjs-demo?retryWrites=true&w=majority',
+    ),
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
