@@ -5,15 +5,19 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { UserModule } from 'src/user/user.module';
-import { UserService } from 'src/user/user.service';
+import { PassportModule } from '@nestjs/passport';
+import { jwtConstants } from './constants';
 
 @Module({
   imports: [
+    UserModule,
+    PassportModule,
     JwtModule.register({
-      secret: 'super-secret-cat',
+      secret: jwtConstants.secret,
     }),
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
+  exports: [AuthService],
 })
 export class AuthModule {}

@@ -36,6 +36,9 @@ export class UserService {
     }
     return user;
   }
+  async findOne(email: string): Promise<User | undefined> {
+    return this.users.find((user) => user.email === email);
+  }
 
   async insertUser({
     name,
