@@ -8,7 +8,7 @@ import {
   Param,
 } from '@nestjs/common';
 
-// import { ApiProperty } from '@nestjs/swagger';
+// import { ApiProperty,  } from '@nestjs/swagger';
 
 import { TaskService } from './task.service';
 
@@ -29,8 +29,7 @@ export class TasksController {
       id: task.id,
       title: task.title,
       description: task.description,
-      isComplete: task.isComplete,
-      userId: task.userId,
+      flag: task.flag,
       created: task.created,
       deadline: task.deadline,
     };
@@ -40,16 +39,14 @@ export class TasksController {
   async addTask(
     @Body('title') taskTitle: string,
     @Body('description') taskDescription: string,
-    @Body('isComplete') taskIsComplete: boolean,
-    @Body('userId') taskUserId: string,
+    @Body('flag') taskFlag: string,
     @Body('created') taskCreated: Date,
     @Body('deadline') taskDeadline: Date,
   ) {
     const generatedId = await this.taskService.insertTask({
       title: taskTitle,
       description: taskDescription,
-      isComplete: taskIsComplete,
-      userId: taskUserId,
+      flag: taskFlag,
       created: taskCreated,
       deadline: taskDeadline,
     });
@@ -61,8 +58,7 @@ export class TasksController {
     @Param('id') taskId: string,
     @Body('title') taskTitle: string,
     @Body('description') taskDesc: string,
-    @Body('isComplete') taskIsComplete: boolean,
-    @Body('userId') taskUserId: string,
+    @Body('flag') taskFlag: string,
     @Body('created') taskCreated: Date,
     @Body('deadline') taskDeadline: Date,
   ) {
@@ -70,8 +66,7 @@ export class TasksController {
       taskId,
       taskTitle,
       taskDesc,
-      taskIsComplete,
-      taskUserId,
+      taskFlag,
       taskCreated,
       taskDeadline,
     );

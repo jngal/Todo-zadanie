@@ -16,8 +16,7 @@ export class TaskService {
       id: task.id,
       title: task.title,
       description: task.description,
-      isComplete: task.isComplete,
-      userId: task.userId,
+      flag: task.flag,
       created: task.created,
       deadline: task.deadline,
     }));
@@ -43,23 +42,20 @@ export class TaskService {
   async insertTask({
     title,
     description,
-    isComplete,
-    userId,
+    flag,
     created,
     deadline,
   }: {
     title: string;
     description: string;
-    isComplete: boolean;
-    userId: string;
+    flag: string;
     created: Date;
     deadline: Date;
   }) {
     const newTask = new this.taskModel({
       title: title,
       description: description,
-      isComplete: isComplete,
-      userId: userId,
+      flag: flag,
       created: created,
       deadline: deadline,
     });
@@ -71,8 +67,7 @@ export class TaskService {
     taskId: string,
     title: string,
     description: string,
-    isComplete: boolean,
-    userId: string,
+    flag: string,
     created: Date,
     deadline: Date,
   ) {
@@ -83,11 +78,8 @@ export class TaskService {
     if (description) {
       updatedTask.description = description;
     }
-    if (isComplete) {
-      updatedTask.isComplete = isComplete;
-    }
-    if (userId) {
-      updatedTask.userId = userId;
+    if (flag) {
+      updatedTask.flag = flag;
     }
     if (created) {
       updatedTask.created = created;

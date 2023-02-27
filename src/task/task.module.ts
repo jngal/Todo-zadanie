@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { TasksController } from './tasks.controller';
+import { TasksController } from './task.controller';
 import { TaskService } from './task.service';
 import { TaskSchema } from './task.model';
 
@@ -10,4 +10,4 @@ import { TaskSchema } from './task.model';
   controllers: [TasksController],
   providers: [TaskService],
 })
-export class TodoModule {}
+export class TaskModule {}
