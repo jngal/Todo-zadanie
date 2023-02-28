@@ -1,99 +1,60 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { CreateTaskDto } from 'src/auth/dto/create-task.dto';
+import { UpdateTaskDto } from 'src/auth/dto/update-task.dto';
 
 import { Task } from './task.model';
 
 @Injectable()
 export class TaskService {
-  private tasks: Task[] = [];
-
   constructor(@InjectModel('Task') private readonly taskModel: Model<Task>) {}
 
-  async getTasks() {
-    const tasks = await this.taskModel.find().exec();
-    return tasks.map((task) => ({
-      id: task.id,
-      title: task.title,
-      description: task.description,
-      flag: task.flag,
-      created: task.created,
-      deadline: task.deadline,
-    }));
+  async getTasks(): Promise<Task[]> {
+    const taskData = await this.taskModel.find();
+    if (!taskData || taskData.length == 0) {
+      throw new NotFoundException('Task data not found');
+    }
+    return taskData;
   }
 
-  async getTask(taskId: string) {
-    const task = await this.findTask(taskId);
-    return task;
-  }
-  private async findTask(id: string): Promise<Task> {
-    let task;
-    try {
-      task = await this.taskModel.findById(id);
-    } catch (error) {
-      throw new NotFoundException(`Could not find task with id: ${id}`);
-    }
+  async getTask(taskId: string): Promise<Task> {
+    const task = await this.taskModel.findById(taskId);
     if (!task) {
-      throw new NotFoundException(`Could not find task with id: ${id}`);
+      throw new NotFoundException(`Could not find Task with id: ${taskId}`);
     }
     return task;
   }
 
-  async insertTask({
-    title,
-    description,
-    flag,
-    created,
-    deadline,
-  }: {
-    title: string;
-    description: string;
-    flag: string;
-    created: Date;
-    deadline: Date;
-  }) {
-    const newTask = new this.taskModel({
-      title: title,
-      description: description,
-      flag: flag,
-      created: created,
-      deadline: deadline,
-    });
-    const result = await newTask.save();
-    return result.id as string;
+  async createTask(createTaskDto: CreateTaskDto): Promise<Task> {
+    const newTask = await new this.taskModel(createTaskDto);
+    return newTask.save();
   }
 
   async updateTask(
     taskId: string,
-    title: string,
-    description: string,
-    flag: string,
-    created: Date,
-    deadline: Date,
-  ) {
-    const updatedTask = await this.findTask(taskId);
-    if (title) {
-      updatedTask.title = title;
+    updateTaskDto: UpdateTaskDto,
+  ): Promise<Task> {
+    const existingTask = await this.taskModel.findByIdAndUpdate(
+      taskId,
+      updateTaskDto,
+      { new: true },
+    );
+    if (!existingTask) {
+      throw new NotFoundException(
+        `Could not find task with id: ${taskId} and Update it.`,
+      );
     }
-    if (description) {
-      updatedTask.description = description;
-    }
-    if (flag) {
-      updatedTask.flag = flag;
-    }
-    if (created) {
-      updatedTask.created = created;
-    }
-    if (deadline) {
-      updatedTask.deadline = deadline;
-    }
-    updatedTask.save();
+    return existingTask;
   }
 
-  async deleteTask(taskId: string) {
-    const result = await this.taskModel.deleteOne({ _id: taskId }).exec();
-    if (result.deletedCount === 0) {
-      throw new NotFoundException(`Could not find task with id: ${taskId}`);
+  async deleteTask(taskId: string): Promise<Task> {
+    const deleteTask = await this.taskModel.findByIdAndDelete(taskId);
+    if (!deleteTask) {
+      throw new NotFoundException(
+        `Could not find task with id: ${taskId} and delete it.`,
+      );
     }
+    return deleteTask;
   }
 }

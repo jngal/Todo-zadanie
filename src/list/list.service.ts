@@ -10,12 +10,10 @@ import { UpdateListDto } from 'src/auth/dto/update-list.dto';
 
 @Injectable()
 export class ListService {
-  //   private lists: List[] = [];
-
   constructor(@InjectModel('List') private readonly listModel: Model<List>) {}
 
   async getLists(): Promise<List[]> {
-    const listData = await this.listModel.find().populate('');
+    const listData = await this.listModel.find();
     if (!listData || listData.length == 0) {
       throw new NotFoundException('List data not found');
     }
@@ -51,39 +49,6 @@ export class ListService {
     }
     return existingList;
   }
-
-  //   private async findList(id: string): Promise<List> {
-  //     let list;
-  //     try {
-  //       list = await this.listModel.findById(id);
-  //     } catch (error) {
-  //       throw new NotFoundException(`Could not find list with id: ${id}`);
-  //     }
-  //     if (!list) {
-  //       throw new NotFoundException(`Could not find list with id: ${id}`);
-  //     }
-  //     return list;
-  //   }
-
-  //   async insertList({ title, tasks }: { title: string; tasks: object }) {
-  //     const newList = new this.listModel({
-  //       title: title,
-  //       tasks: tasks,
-  //     });
-  //     const result = await newList.save();
-  //     return result.id as string;
-  //   }
-
-  //   async updateList(listId: string, title: string, tasks: object) {
-  //     const updatedList = await this.findList(listId);
-  //     if (title) {
-  //       updatedList.title = title;
-  //     }
-  //     if (tasks) {
-  //       updatedList.tasks = { tasks };
-  //     }
-  //     updatedList.save();
-  //   }
 
   async deleteList(listId: string): Promise<List> {
     const deleteList = await this.listModel.findByIdAndDelete(listId);

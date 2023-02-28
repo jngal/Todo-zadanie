@@ -70,7 +70,7 @@ export class ListController {
 
   @UseGuards(JwtAuthGuard)
   @Put('/:id')
-  async updateStudent(
+  async updateList(
     @Res() response,
     @Param('id') listId: string,
     @Body() updateListDto: UpdateListDto,

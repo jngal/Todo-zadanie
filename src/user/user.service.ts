@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { CreateUserDto } from 'src/auth/dto/create-user.dto';
+import { UpdateUserDto } from 'src/auth/dto/update-user.dto';
 
 import { User } from './user.model';
 
@@ -40,41 +42,26 @@ export class UserService {
     return this.users.find((user) => user.email === email);
   }
 
-  async insertUser({
-    name,
-    email,
-    password,
-  }: {
-    name: string;
-    email: string;
-    password: string;
-  }) {
-    const newUser = new this.userModel({
-      name: name,
-      email: email,
-      password: password,
-    });
-    const result = await newUser.save();
-    return result.id as string;
+  async insertUser(createUserDto: CreateUserDto): Promise<User> {
+    const newTask = await new this.userModel(createUserDto);
+    return newTask.save();
   }
 
   async updateUser(
     userId: string,
-    name: string,
-    email: string,
-    password: string,
-  ) {
-    const updatedUser = await this.findUser(userId);
-    if (name) {
-      updatedUser.name = name;
+    updateUserDto: UpdateUserDto,
+  ): Promise<User> {
+    const existingUser = await this.userModel.findByIdAndUpdate(
+      userId,
+      updateUserDto,
+      { new: true },
+    );
+    if (!existingUser) {
+      throw new NotFoundException(
+        `Could not find list with id: ${userId} and Update it.`,
+      );
     }
-    if (email) {
-      updatedUser.email = email;
-    }
-    if (password) {
-      updatedUser.password = password;
-    }
-    updatedUser.save();
+    return existingUser;
   }
 
   async deleteUser(userId: string) {

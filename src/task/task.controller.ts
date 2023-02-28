@@ -2,11 +2,17 @@ import {
   Controller,
   Get,
   Post,
-  Patch,
+  Put,
   Delete,
   Body,
+  Res,
   Param,
+  HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
+import { CreateTaskDto } from 'src/auth/dto/create-task.dto';
+import { UpdateTaskDto } from 'src/auth/dto/update-task.dto';
+import { JwtAuthGuard } from 'src/utils/guards/jwt-guard.guard';
 
 // import { ApiProperty,  } from '@nestjs/swagger';
 
@@ -16,66 +22,85 @@ import { TaskService } from './task.service';
 export class TasksController {
   constructor(private readonly taskService: TaskService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Get()
-  async getAllTasks() {
-    const tasks = await this.taskService.getTasks();
-    return tasks;
+  async getAllTasks(@Res() response) {
+    try {
+      const tasks = await this.taskService.getTasks();
+      return response.status(HttpStatus.OK).json({
+        message: 'All Tasks data found successfully',
+        tasks,
+      });
+    } catch (err) {
+      return response.status(err.status).json(err.response);
+    }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':taskId')
-  async getSingleTask(@Param('taskId') id: string) {
-    const task = await this.taskService.getTask(id);
-    return {
-      id: task.id,
-      title: task.title,
-      description: task.description,
-      flag: task.flag,
-      created: task.created,
-      deadline: task.deadline,
-    };
+  async getSingleTask(@Res() response, @Param('taskId') id: string) {
+    try {
+      const task = await this.taskService.getTask(id);
+      return response.status(HttpStatus.OK).json({
+        message: 'Task found successfully',
+        task,
+      });
+    } catch (err) {
+      return response.status(err.status).json(err.response);
+    }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post()
-  async addTask(
-    @Body('title') taskTitle: string,
-    @Body('description') taskDescription: string,
-    @Body('flag') taskFlag: string,
-    @Body('created') taskCreated: Date,
-    @Body('deadline') taskDeadline: Date,
-  ) {
-    const generatedId = await this.taskService.insertTask({
-      title: taskTitle,
-      description: taskDescription,
-      flag: taskFlag,
-      created: taskCreated,
-      deadline: taskDeadline,
-    });
-    return { id: generatedId };
+  async createTask(@Res() response, @Body() createTaskDto: CreateTaskDto) {
+    try {
+      const newTask = await this.taskService.createTask(createTaskDto);
+      return response.status(HttpStatus.CREATED).json({
+        message: 'Task has been created successfully',
+        newTask,
+      });
+    } catch (err) {
+      return response.status(HttpStatus.BAD_REQUEST).json({
+        statusCode: 400,
+        message: 'Error Task not created',
+        error: 'Bad request',
+      });
+    }
   }
 
-  @Patch(':id')
+  @UseGuards(JwtAuthGuard)
+  @Put('/:id')
   async updateTask(
+    @Res() response,
     @Param('id') taskId: string,
-    @Body('title') taskTitle: string,
-    @Body('description') taskDesc: string,
-    @Body('flag') taskFlag: string,
-    @Body('created') taskCreated: Date,
-    @Body('deadline') taskDeadline: Date,
+    @Body() updateTaskDto: UpdateTaskDto,
   ) {
-    await this.taskService.updateTask(
-      taskId,
-      taskTitle,
-      taskDesc,
-      taskFlag,
-      taskCreated,
-      taskDeadline,
-    );
-    return null;
+    try {
+      const existingTask = await this.taskService.updateTask(
+        taskId,
+        updateTaskDto,
+      );
+      return response.status(HttpStatus.OK).json({
+        message: 'Task has been successfully updated',
+        existingTask,
+      });
+    } catch (err) {
+      return response.status(err.status).json(err.response);
+    }
   }
 
-  @Delete(':id')
-  async removeProduct(@Param('id') taskId: string) {
-    await this.taskService.deleteTask(taskId);
-    return null;
+  @UseGuards(JwtAuthGuard)
+  @Delete('/:id')
+  async deleteTask(@Res() response, @Param('id') taskId: string) {
+    try {
+      const deletedTask = await this.taskService.deleteTask(taskId);
+
+      return response.status(HttpStatus.OK).json({
+        message: 'Task Deleted Successfully',
+        deletedTask,
+      });
+    } catch (err) {
+      return response.status(err.status).json(err.response);
+    }
   }
 }
