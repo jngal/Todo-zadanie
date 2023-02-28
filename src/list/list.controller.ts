@@ -2,11 +2,17 @@ import {
   Controller,
   Get,
   Post,
-  Patch,
+  Put,
+  Res,
+  HttpStatus,
   Delete,
   Body,
   Param,
+  UseGuards,
 } from '@nestjs/common';
+import { CreateListDto } from 'src/auth/dto/create-list.dto';
+import { UpdateListDto } from 'src/auth/dto/update-list.dto';
+import { JwtAuthGuard } from 'src/utils/guards/jwt-guard.guard';
 
 // import { ApiProperty } from '@nestjs/swagger';
 
@@ -16,47 +22,85 @@ import { ListService } from './list.service';
 export class ListController {
   constructor(private readonly listService: ListService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Get()
-  async getAllLists() {
-    const lists = await this.listService.getLists();
-    return lists;
+  async getAllLists(@Res() response) {
+    try {
+      const listData = await this.listService.getLists();
+      return response.status(HttpStatus.OK).json({
+        message: 'All list data found successfully',
+        listData,
+      });
+    } catch (err) {
+      return response.status(err.status).json(err.response);
+    }
   }
 
-  @Get(':listId')
-  async getSingleList(@Param('listId') id: string) {
-    const list = await this.listService.getList(id);
-    return {
-      id: list.id,
-      title: list.title,
-      tasks: list.tasks,
-    };
+  @UseGuards(JwtAuthGuard)
+  @Get(':id')
+  async getSingleList(@Res() response, @Param('id') listId: string) {
+    try {
+      const existingList = await this.listService.getList(listId);
+      return response.status(HttpStatus.OK).json({
+        message: 'List found successfully',
+        existingList,
+      });
+    } catch (err) {
+      return response.status(err.status).json(err.response);
+    }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post()
-  async addList(
-    @Body('title') listTitle: string,
-    @Body('tasks') listTasks: object,
-  ) {
-    const generatedId = await this.listService.insertList({
-      title: listTitle,
-      tasks: listTasks,
-    });
-    return { id: generatedId };
+  async createList(@Res() response, @Body() createListDto: CreateListDto) {
+    try {
+      const newList = await this.listService.createList(createListDto);
+      return response.status(HttpStatus.CREATED).json({
+        message: 'List has been created successfully',
+        newList,
+      });
+    } catch (err) {
+      return response.status(HttpStatus.BAD_REQUEST).json({
+        statusCode: 400,
+        message: 'Error List not created',
+        error: 'Bad request',
+      });
+    }
   }
 
-  @Patch(':id')
-  async updateList(
+  @UseGuards(JwtAuthGuard)
+  @Put('/:id')
+  async updateStudent(
+    @Res() response,
     @Param('id') listId: string,
-    @Body('title') listTitle: string,
-    @Body('tasks') listTasks: object,
+    @Body() updateListDto: UpdateListDto,
   ) {
-    await this.listService.updateList(listId, listTitle, listTasks);
-    return null;
+    try {
+      const existingList = await this.listService.updateList(
+        listId,
+        updateListDto,
+      );
+      return response.status(HttpStatus.OK).json({
+        message: 'List has been successfully updated',
+        existingList,
+      });
+    } catch (err) {
+      return response.status(err.status).json(err.response);
+    }
   }
 
-  @Delete(':id')
-  async removeProduct(@Param('id') listId: string) {
-    await this.listService.deleteList(listId);
-    return null;
+  @UseGuards(JwtAuthGuard)
+  @Delete('/:id')
+  async deleteList(@Res() response, @Param('id') listId: string) {
+    try {
+      const deletedList = await this.listService.deleteList(listId);
+
+      return response.status(HttpStatus.OK).json({
+        message: 'List Deleted Successfully',
+        deletedList,
+      });
+    } catch (err) {
+      return response.status(err.status).json(err.response);
+    }
   }
 }

@@ -6,12 +6,9 @@ export const TaskSchema = new mongoose.Schema({
   flag: { type: String, required: true },
   created: { type: Date, required: false },
   deadline: { type: Date, required: false },
-  lists: { type: mongoose.Schema.Types.ObjectId, ref: 'list' },
 });
 
-//reference for List.tasks
-// module.exports = mongoose.model('task', TaskSchema);
-// = Task;
+export const TaskModel = mongoose.model('Task', TaskSchema);
 
 export interface Task extends mongoose.Document {
   id: string;
