@@ -11,7 +11,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CreateUserDto } from 'src/auth/dto/create-user.dto';
-import { UpdateListDto } from 'src/auth/dto/update-list.dto';
 import { UpdateUserDto } from 'src/auth/dto/update-user.dto';
 import { JwtAuthGuard } from 'src/utils/guards/jwt-guard.guard';
 

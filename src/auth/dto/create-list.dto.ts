@@ -5,4 +5,8 @@ export class CreateListDto {
   @MaxLength(100)
   @IsNotEmpty()
   readonly title: string;
+
+  readonly tasks: object;
+  @IsNotEmpty()
+  readonly user: string;
 }

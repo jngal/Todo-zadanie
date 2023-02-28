@@ -12,32 +12,24 @@ export class UserService {
 
   constructor(@InjectModel('User') private readonly userModel: Model<User>) {}
 
-  async getUsers() {
-    const users = await this.userModel.find().exec();
-    return users.map((user) => ({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      password: user.password,
-    }));
+  async getUsers(): Promise<User[]> {
+    const users = await this.userModel.find().populate('lists');
+    if (!users || users.length == 0) {
+      throw new NotFoundException('User data not found');
+    }
+    return users;
   }
 
-  async getUser(userId: string) {
-    const user = await this.findUser(userId);
-    return user;
-  }
-  private async findUser(id: string): Promise<User> {
-    let user;
-    try {
-      user = await this.userModel.findById(id);
-    } catch (error) {
-      throw new NotFoundException(`Could not find user with id: ${id}`);
-    }
+  async getUser(userId: string): Promise<User> {
+    const user = await this.userModel
+      .findById(userId)
+      .populate('lists', 'title');
     if (!user) {
-      throw new NotFoundException(`Could not find user with id: ${id}`);
+      throw new NotFoundException(`Could not find Task with id: ${userId}`);
     }
     return user;
   }
+
   async findOne(email: string): Promise<User | undefined> {
     return this.users.find((user) => user.email === email);
   }

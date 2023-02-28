@@ -11,8 +11,9 @@ export class CreateTaskDto {
   @IsString()
   @MaxLength(20)
   readonly flag: string;
-  @IsDate()
+  // @IsDate()
   readonly created: Date;
-  @IsDate()
+  // @IsDate()
   readonly deadline: Date;
+  readonly list: string;
 }

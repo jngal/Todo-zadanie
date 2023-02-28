@@ -8,10 +8,13 @@ import { Task } from './task.model';
 
 @Injectable()
 export class TaskService {
-  constructor(@InjectModel('Task') private readonly taskModel: Model<Task>) {}
+  constructor(
+    @InjectModel('Task')
+    private readonly taskModel: Model<Task>,
+  ) {}
 
   async getTasks(): Promise<Task[]> {
-    const taskData = await this.taskModel.find();
+    const taskData = await this.taskModel.find().populate('list', 'title');
     if (!taskData || taskData.length == 0) {
       throw new NotFoundException('Task data not found');
     }
@@ -19,7 +22,9 @@ export class TaskService {
   }
 
   async getTask(taskId: string): Promise<Task> {
-    const task = await this.taskModel.findById(taskId);
+    const task = await (
+      await this.taskModel.findById(taskId)
+    ).populate('list', 'title');
     if (!task) {
       throw new NotFoundException(`Could not find Task with id: ${taskId}`);
     }
